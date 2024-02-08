@@ -9,5 +9,5 @@ func main() {
 	config.ConnectDB()
 	router := routes.SetupRouter()
 
-	router.Run(":8088")
+	router.Run(":8000")
 }

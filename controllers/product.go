@@ -35,7 +35,7 @@ func CreateProduct(c *gin.Context) {
 	Harga: harga,
 	Size: c.PostForm("size"),
 	Deskripsi: c.PostForm("deskripsi"),
-	Photos: filepath + file.Filename,
+	Photos: file.Filename,
 	}
 
 	if err := config.DB.Create(&newProduct).Error; err != nil {
@@ -47,10 +47,13 @@ func CreateProduct(c *gin.Context) {
 }
 
 func GetProduct(c *gin.Context) {
-	var product []models.Product
-	config.DB.Find(&product)
-
-	c.JSON(http.StatusOK, gin.H{"data": product})
+	var Products []models.Product
+    if err := config.DB.Find(&Products).Error; err != nil {
+        c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Status": "Failed", "Message": err.Error()})
+        return
+    }
+ 
+    c.JSON(http.StatusOK, gin.H{"data": Products})
 }
 
 func GetProductById(c *gin.Context) {
@@ -58,12 +61,13 @@ func GetProductById(c *gin.Context) {
 
 	var Product models.Product
 	if err := config.DB.First(&Product, id).Error; err != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"Status": "Failed", "Message": err.Error()})
-		return
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"Status": "Failed", "Message": err.Error()})
+			return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": Product})
 }
+
 
 func UpdateProduct(c *gin.Context) {
 	id := c.Param("id")
@@ -98,7 +102,7 @@ func UpdateProduct(c *gin.Context) {
 			Harga:     harga,
 			Size:      c.PostForm("size"),
 			Deskripsi: c.PostForm("deskripsi"),
-			Photos:    filepath + file.Filename,
+			Photos:  file.Filename,
 	}
 
 	if err := config.DB.Model(&existingProduct).Updates(&updateProduct).Error; err != nil {
@@ -126,3 +130,4 @@ func DeleteProduct(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"Status": "Success", "Message": "Product deleted"})
 }
+
